@@ -1,0 +1,47 @@
+{
+  "app": {
+    "badge": "multi-gpt",
+    "title": "Comparador de Modelos em Paralelo",
+    "description": "Escreva um prompt e compare, com o multi-gpt, como o OpenAI GPT-4o mini, o Google Gemini 1.5 Pro e o Claude 3.5 Sonnet respondem lado a lado. Ative apenas os modelos que desejar consultar.",
+    "languageLabel": "Idioma",
+    "promptLabel": "Prompt",
+    "promptPlaceholder": "Descreva a tarefa que você quer comparar...",
+    "submit": "Consultar modelos selecionados",
+    "submitLoading": "Consultando modelos...",
+    "reset": "Limpar"
+  },
+  "tokens": {
+    "label": "Tokens utilizados:",
+    "loading": "Consultando..."
+  },
+  "errors": {
+    "promptRequired": "Digite um prompt antes de enviar.",
+    "modelRequired": "Selecione ao menos um modelo para comparar.",
+    "unknownModelError": "Erro desconhecido ao consultar o modelo."
+  },
+  "models": {
+    "openai": {
+      "label": "OpenAI GPT-4o mini",
+      "helper": "Respostas equilibradas com bom raciocínio geral."
+    },
+    "gemini": {
+      "label": "Google Gemini 1.5 Pro",
+      "helper": "Fortes capacidades multimodal e contextual."
+    },
+    "claude": {
+      "label": "Anthropic Claude 3.5 Sonnet",
+      "helper": "Ótimo para textos longos e análise estruturada."
+    }
+  },
+  "responses": {
+    "loading": "Gerando resposta...",
+    "unselected": "Modelo não selecionado para esta consulta."
+  },
+  "footer": {
+    "disclaimer": "Para produção, use um backend para proteger as chaves das APIs."
+  },
+  "language": {
+    "pt": "Português",
+    "en": "Inglês"
+  }
+}

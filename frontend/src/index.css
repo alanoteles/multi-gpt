@@ -12,4 +12,21 @@
   .glass-panel {
     @apply bg-white/70 backdrop-blur-md border border-white/60 shadow-card;
   }
+
+  .markdown-content {
+    @apply space-y-3;
+  }
+
+  .markdown-content ul,
+  .markdown-content ol {
+    @apply list-disc pl-5 space-y-1;
+  }
+
+  .markdown-content ol {
+    @apply list-decimal;
+  }
+
+  .markdown-content code {
+    @apply rounded bg-slate-100 px-1 py-0.5 text-xs font-mono text-slate-800;
+  }
 }

@@ -1,0 +1,47 @@
+{
+  "app": {
+    "badge": "multi-gpt",
+    "title": "Parallel Model Comparator",
+    "description": "Write a prompt and compare, with multi-gpt, how OpenAI GPT-4o mini, Google Gemini 2.5 Flash, and Claude 4.5 Haiku respond side by side. Enable only the models you want to query.",
+    "languageLabel": "Language",
+    "promptLabel": "Prompt",
+    "promptPlaceholder": "Describe the task you want to compare...",
+    "submit": "Query selected models",
+    "submitLoading": "Querying models...",
+    "reset": "Clear"
+  },
+  "tokens": {
+    "label": "Tokens used:",
+    "loading": "Fetching..."
+  },
+  "errors": {
+    "promptRequired": "Please type a prompt before sending.",
+    "modelRequired": "Select at least one model to compare.",
+    "unknownModelError": "Unknown error while querying the model."
+  },
+  "models": {
+    "openai": {
+      "label": "OpenAI GPT-4o mini",
+      "helper": "Balanced answers with solid general reasoning."
+    },
+    "gemini": {
+      "label": "Google Gemini 2.5 Flash",
+      "helper": "Great multimodal and contextual capabilities."
+    },
+    "claude": {
+      "label": "Anthropic Claude 4.5 Haiku",
+      "helper": "Excellent for long-form text and structured analysis."
+    }
+  },
+  "responses": {
+    "loading": "Generating response...",
+    "unselected": "Model not selected for this query."
+  },
+  "footer": {
+    "disclaimer": "For production, use a backend to protect API keys."
+  },
+  "language": {
+    "pt": "Portuguese",
+    "en": "English"
+  }
+}

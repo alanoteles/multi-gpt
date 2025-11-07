@@ -1,0 +1,8 @@
+###
+POST http://localhost:3000/models/query
+Content-Type: application/json
+
+{
+  "prompt": "Explique o conceito de redes neurais em um parágrafo.",
+  "models": ["openai", "gemini", "claude"]
+}

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import ReactMarkdown from "react-markdown";
 import type { ModelOption, ModelResponse } from "../types";
 
 type Props = {
@@ -7,11 +9,10 @@ type Props = {
 };
 
 const ResponseCard = ({ option, response, active }: Props) => {
-  const status = response.loading
-    ? "Gerando resposta..."
-    : response.error
-    ? response.error
-    : response.text;
+  const { t } = useTranslation();
+
+  const loadingText = t("responses.loading");
+  const status = response.loading ? loadingText : response.error ? response.error : response.text;
 
   return (
     <article
@@ -21,8 +22,8 @@ const ResponseCard = ({ option, response, active }: Props) => {
     >
       <header className="flex items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">{option.label}</h3>
-          <p className="text-xs text-slate-600">{option.helper}</p>
+          <h3 className="text-lg font-semibold text-slate-900">{t(option.labelKey)}</h3>
+          <p className="text-xs text-slate-600">{t(option.helperKey)}</p>
         </div>
         <span
           className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wide ${option.badgeClasses}`}
@@ -35,7 +36,7 @@ const ResponseCard = ({ option, response, active }: Props) => {
         {response.loading && (
           <div className="flex items-center gap-3 text-slate-600">
             <span className="h-2 w-2 animate-ping rounded-full bg-powder-500" />
-            Gerando resposta...
+            {loadingText}
           </div>
         )}
 
@@ -44,13 +45,13 @@ const ResponseCard = ({ option, response, active }: Props) => {
         )}
 
         {!response.loading && !response.error && status && (
-          <pre className="whitespace-pre-wrap font-sans">{status}</pre>
+          <div className="markdown-content text-sm leading-relaxed text-slate-800">
+            <ReactMarkdown>{status}</ReactMarkdown>
+          </div>
         )}
 
         {!response.loading && !active && !status && (
-          <p className="text-sm text-slate-500">
-            Modelo n\u00e3o selecionado para esta consulta.
-          </p>
+          <p className="text-sm text-slate-500">{t("responses.unselected")}</p>
         )}
       </div>
     </article>
