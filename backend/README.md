@@ -1,98 +1,95 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Multi-GPT API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This NestJS service powers the multi-gpt experience by orchestrating simultaneous requests to OpenAI (ChatGPT), Google Gemini, and Anthropic Claude. A single POST reaches every provider in parallel, normalizes their payloads, and returns a side-by-side bundle that includes the answer text, token usage, and any provider-specific error messages. It is a thin, strongly-typed layer designed to keep API keys on the server, deliver consistent latency, and make the frontend renderer trivial.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Highlights
 
-## Description
+- **Parallel fan-out** – runs all selected providers concurrently to minimize perceived latency even when a single model stalls.
+- **Unified contract** – enforces a shared DTO, trims prompts, validates model choices, and always returns predictable metadata for rendering.
+- **Token-aware responses** – surfaces tokens used and remaining (when available) so you can keep an eye on costs in real time.
+- **Guardrails built in** – rejects empty prompts, deduplicates model selections, and logs provider failures without crashing the request.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Architecture in a Nutshell
 
-## Project setup
-
-```bash
-$ npm install
+```
+Client ➜ POST /models/query ➜ ModelsController ➜ ModelsService ➜ Providers (OpenAI, Gemini, Claude)
 ```
 
-## Compile and run the project
+`ModelsService` is where the fan-out happens. Each provider gets its own handler with:
 
-```bash
-# development
-$ npm run start
+- centralized API key retrieval via `ConfigService`
+- custom error formatting so upstream issues become human-readable
+- configurable defaults (`MAX_TOKENS`, `GEMINI_MODEL`, `CLAUDE_MODEL`)
 
-# watch mode
-$ npm run start:dev
+## API Reference
 
-# production mode
-$ npm run start:prod
+- **Endpoint:** `POST /models/query`
+- **Payload:**
+
+```json
+{
+  "prompt": "Explain the difference between RAG and fine-tuning.",
+  "models": ["openai", "gemini", "claude"]
+}
 ```
 
-## Run tests
+- **Response:**
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```json
+{
+  "prompt": "Explain the difference between RAG and fine-tuning.",
+  "results": [
+    { "id": "openai", "text": "...", "tokensUsed": 542, "tokensRemaining": 1790 },
+    { "id": "gemini", "text": "...", "tokensUsed": 501 },
+    { "id": "claude", "error": "Claude: Model overload right now." }
+  ]
+}
 ```
 
-## Deployment
+Errors are reported per provider, so one flaky API never prevents the others from returning value.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Getting Started
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Prerequisites
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+- Node.js ≥ 20
+- npm ≥ 9
+
+### Environment variables
+
+Create a `.env` file (or configure your secret manager) with:
+
+```
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=...
+CLAUDE_API_KEY=...
+# Optional
+GEMINI_MODEL=gemini-1.5-flash-latest
+CLAUDE_MODEL=claude-3-5-sonnet-20240620
+MAX_TOKENS=800
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Install & run
 
-## Resources
+```bash
+npm install
+npm run start:dev
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+The API listens on `http://localhost:3000`. The `/` route returns a quick health-check string, while `/models/query` performs the multi-model request.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Test suite
 
-## Support
+```bash
+npm test        # unit tests
+npm run test:e2e
+npm run test:cov
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Deployment Notes
 
-## Stay in touch
+The service is stateless, so you can scale it horizontally. Keep API keys in your secrets manager, and configure `MAX_TOKENS` per environment to control costs. Because every outbound call is pure HTTP, the app runs anywhere Node.js is available—Docker, Render, Fly.io, AWS, etc.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+If you are browsing the repository for the first time, start the backend with the instructions above and then open the React frontend (see `frontend/README.md`) to enjoy synchronized responses from the industry’s top conversational models. The combination showcases how the same prompt can produce wildly different insights—and gives you the tooling to compare them instantly.
